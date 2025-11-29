@@ -20,13 +20,27 @@ if not exist "%CONFIG_FILE%" (
 echo Loading configuration from %CONFIG_FILE%...
 for /f "usebackq tokens=1,2 delims==" %%a in ("%CONFIG_FILE%") do (
     if not "%%a"=="[Settings]" (
-        REM Trim spaces from variable value
         set "%%a=%%b"
     )
 )
 
-REM Trim leading/trailing spaces from REMOTE_NAME
+REM Trim spaces from REMOTE_NAME
 for /f "tokens=* delims= " %%a in ("%REMOTE_NAME%") do set "REMOTE_NAME=%%a"
+
+REM ========================================
+REM Handle rclone config password
+REM ========================================
+if not defined RCLONE_CONFIG_PASS (
+    echo.
+    echo ========================================
+    echo Password Required
+    echo ========================================
+    echo.
+    echo The rclone configuration is password-protected.
+    echo.
+    set /p RCLONE_CONFIG_PASS="Enter rclone config password: "
+    echo.
+)
 
 REM ========================================
 REM Timestamp Generation
@@ -44,6 +58,7 @@ echo - NAS: %NAS_PATH%
 echo - Remote: %REMOTE_NAME%
 echo - Generations: %GENERATIONS%
 echo - Target: %NAS_PATH%\gdrive\backup_%TIMESTAMP%
+echo - Security: rclone config is encrypted
 echo ========================================
 echo.
 
@@ -63,7 +78,10 @@ if not exist "%RCLONE_PATH%" (
 REM Check NAS accessibility
 if not exist "%NAS_PATH%\" (
     echo ERROR: NAS path not accessible: %NAS_PATH%
-    echo Please check network connection and credentials.
+    echo Please check:
+    echo - NAS is powered on
+    echo - Network connection is active
+    echo - Network credentials are configured
     pause
     exit /b 1
 )
@@ -91,6 +109,13 @@ if errorlevel 1 (
     echo.
     echo ERROR: Backup failed.
     echo Check log: %NAS_PATH%\gdrive\logs\backup_%TIMESTAMP%.log
+    echo.
+    echo Common causes:
+    echo - Incorrect rclone config password
+    echo - Network connection lost
+    echo - Google Drive access token expired
+    echo - NAS storage full
+    echo.
     set BACKUP_FAILED=1
 ) else (
     echo Backup completed successfully.
@@ -104,6 +129,11 @@ echo [2/3] Verifying backup...
 if not exist "%NAS_PATH%\gdrive\backup_%TIMESTAMP%" (
     echo ERROR: Backup folder was not created.
     echo Skipping cleanup to preserve existing backups.
+    echo.
+    echo Please check:
+    echo - Log file: %NAS_PATH%\gdrive\logs\backup_%TIMESTAMP%.log
+    echo - NAS permissions
+    echo - Available disk space
     pause
     exit /b 1
 )
@@ -159,14 +189,19 @@ echo Logs location: %NAS_PATH%\gdrive\logs\backup_%TIMESTAMP%.log
 
 if defined BACKUP_FAILED (
     echo.
-    echo WARNING: Backup operation failed.
+    echo ========================================
+    echo WARNING: Backup operation failed
+    echo ========================================
+    echo.
     echo Please check the log file for details.
     echo.
     pause
     exit /b 1
 ) else (
     echo.
-    echo All operations completed successfully.
+    echo ========================================
+    echo All operations completed successfully
+    echo ========================================
     echo.
 )
 
