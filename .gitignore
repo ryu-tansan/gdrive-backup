@@ -1,0 +1,58 @@
+# Configuration file (contains user-specific paths)
+config.ini
+
+# Backup folders
+backup_*/
+
+# Log files
+logs/
+*.log
+
+# Windows system files
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+~$*
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+```
+
+
+
+
+# ## 説明：
+
+# ### 除外対象：
+
+# 1. **`config.ini`**
+#    - ユーザー固有の設定（パス、リモート名など）
+#    - 各ユーザーが独自に設定するため、Gitに含めない
+
+# 2. **`backup_*/`**
+#    - バックアップフォルダ全体を除外
+#    - 通常はNAS上にあるが、ローカルテスト時も除外
+
+# 3. **`logs/` と `*.log`**
+#    - ログフォルダとログファイル全般を除外
+
+# 4. **その他**
+#    - Windowsシステムファイル、エディタ一時ファイル
+
+# ---
+
+# ## Git管理に含まれるファイル：
+# ```
+# GoogleDriveBackup/
+#   ├─ setup.bat          ✅ Git管理
+#   ├─ backup.bat         ✅ Git管理
+#   ├─ README.txt         ✅ Git管理
+#   ├─ .gitignore         ✅ Git管理
+#   └─ config.ini         ❌ 除外（.gitignoreで指定）
